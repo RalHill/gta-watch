@@ -9,6 +9,8 @@ import type { IncidentCategory } from "@/types";
 import { reverseGeocode } from "@/lib/geoapify";
 import { roundCoordinates } from "@/lib/utils";
 
+export const dynamic = 'force-dynamic';
+
 // Dynamically import map component (Leaflet requires window)
 const LocationPicker = dynamic(
   () => import("@/components/map/location-picker"),

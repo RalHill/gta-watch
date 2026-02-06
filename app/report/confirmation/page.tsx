@@ -10,6 +10,8 @@ import AIGuidancePanel from "@/components/guidance/ai-guidance-panel";
 import { findNearbyEmergencyServices } from "@/lib/geoapify";
 import type { EmergencyService } from "@/types";
 
+export const dynamic = 'force-dynamic';
+
 export default function ReportConfirmationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();

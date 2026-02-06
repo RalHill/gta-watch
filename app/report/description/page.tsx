@@ -6,6 +6,8 @@ import Link from "next/link";
 import { ShieldAlert, Info, EyeOff } from "lucide-react";
 import type { IncidentCategory } from "@/types";
 
+export const dynamic = 'force-dynamic';
+
 export default function ReportDescriptionPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
