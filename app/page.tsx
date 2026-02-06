@@ -504,9 +504,7 @@ export default function HomePage() {
                   selectedIncident.created_at
                 )}\nMap: https://www.google.com/maps/search/?api=1&query=${selectedIncident.latitude},${selectedIncident.longitude}`;
                 try {
-                  // @ts-expect-error Web Share API
                   if (navigator.share) {
-                    // @ts-expect-error Web Share API
                     await navigator.share({
                       title: "GTA Watch Incident",
                       text,
