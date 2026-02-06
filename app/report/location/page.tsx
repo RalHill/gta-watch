@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import dynamic from "next/dynamic";
+import dynamicImport from "next/dynamic";
 import { ShieldAlert, MapPin, Info, Loader2 } from "lucide-react";
 import type { IncidentCategory } from "@/types";
 import { reverseGeocode } from "@/lib/geoapify";
@@ -12,7 +12,7 @@ import { roundCoordinates } from "@/lib/utils";
 export const dynamic = 'force-dynamic';
 
 // Dynamically import map component (Leaflet requires window)
-const LocationPicker = dynamic(
+const LocationPicker = dynamicImport(
   () => import("@/components/map/location-picker"),
   {
     ssr: false,
