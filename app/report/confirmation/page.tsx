@@ -6,10 +6,7 @@ import Link from "next/link";
 import { ShieldAlert, CheckCircle2, Loader2, MapPin, Phone } from "lucide-react";
 import type { IncidentCategory } from "@/types";
 import { supabase } from "@/lib/supabase/client";
-import type { Database } from "@/lib/supabase/types";
 import AIGuidancePanel from "@/components/guidance/ai-guidance-panel";
-
-type IncidentInsert = Database["public"]["Tables"]["incidents"]["Insert"];
 import { findNearbyEmergencyServices } from "@/lib/geoapify";
 import type { EmergencyService } from "@/types";
 
@@ -49,14 +46,17 @@ export default function ReportConfirmationPage() {
     setError(false);
 
     try {
-      const insertData: IncidentInsert = {
-        category: category!,
-        description: description || null,
-        latitude,
-        longitude,
-        location_label: locationLabel,
-      };
-      const { error: insertError } = await supabase.from("incidents").insert(insertData);
+      const { error: insertError } = await supabase
+        .from("incidents")
+        .insert([
+          {
+            category: category!,
+            description: description || null,
+            latitude,
+            longitude,
+            location_label: locationLabel,
+          },
+        ]);
 
       if (insertError) throw insertError;
 
