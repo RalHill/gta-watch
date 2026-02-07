@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronUp, ChevronDown } from "lucide-react";
 import type { Incident, IncidentCategory } from "@/types";
 import { supabase } from "@/lib/supabase/client";
 import { formatTimeAgo } from "@/lib/utils";
@@ -28,6 +28,7 @@ export default function HomePage() {
   const [tilesStyle, setTilesStyle] = useState<"muted" | "normal">("muted");
   const [toast, setToast] = useState<string | null>(null);
   const [map, setMap] = useState<import("leaflet").Map | null>(null);
+  const [showMobilePanel, setShowMobilePanel] = useState(false);
 
   useEffect(() => {
     async function fetchIncidents() {
@@ -104,38 +105,44 @@ export default function HomePage() {
 
       <div className="absolute inset-0 pointer-events-none map-overlay-gradient z-[1]" />
 
-      {/* Top Bar */}
-      <header className="absolute left-8 top-6 right-8 z-20 flex items-center justify-between pointer-events-none">
-        <div className="pointer-events-auto flex items-center gap-4 bg-surface/80 backdrop-blur-md border border-white/10 px-6 py-3 rounded-2xl shadow-2xl">
-          <div className="flex items-center gap-3">
-            <div className="bg-primary size-8 rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
+      {/* Top Bar - Mobile Optimized */}
+      <header className="absolute left-3 md:left-8 top-3 md:top-6 right-3 md:right-8 z-20 flex items-center justify-between pointer-events-none gap-2">
+        {/* Logo Section */}
+        <div className="pointer-events-auto flex items-center gap-2 md:gap-4 bg-surface/80 backdrop-blur-md border border-white/10 px-3 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl shadow-2xl">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="bg-primary size-7 md:size-8 rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
               <span
-                className="material-symbols-outlined text-white text-xl"
+                className="material-symbols-outlined text-white text-lg md:text-xl"
                 style={{ fontVariationSettings: '"FILL" 1' }}
               >
                 radar
               </span>
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight leading-none text-text-main">
+              <h1 className="text-sm md:text-xl font-bold tracking-tight leading-none text-text-main">
                 Toronto Incident Map
               </h1>
-              <p className="text-[10px] text-primary font-bold uppercase tracking-widest mt-0.5">
+              <p className="hidden md:block text-[10px] text-primary font-bold uppercase tracking-widest mt-0.5">
                 GTA Watch Real-time Dashboard
               </p>
             </div>
           </div>
-          <div className="w-px h-8 bg-white/10 mx-2" />
-          <div className="flex items-center gap-2">
-            <span className="flex size-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-xs font-semibold text-text-main/70 uppercase tracking-wider">
-              Live System
-            </span>
+          {/* Live badge - desktop only */}
+          <div className="hidden md:flex items-center">
+            <div className="w-px h-8 bg-white/10 mx-2" />
+            <div className="flex items-center gap-2">
+              <span className="flex size-2 rounded-full bg-primary animate-pulse" />
+              <span className="text-xs font-semibold text-text-main/70 uppercase tracking-wider">
+                Live System
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="pointer-events-auto flex items-center gap-4">
-          <div className="flex bg-surface/90 backdrop-blur-md border border-white/10 p-1.5 rounded-xl shadow-2xl">
+        {/* Right side controls */}
+        <div className="pointer-events-auto flex items-center gap-2 md:gap-4">
+          {/* View toggle - desktop only */}
+          <div className="hidden md:flex bg-surface/90 backdrop-blur-md border border-white/10 p-1.5 rounded-xl shadow-2xl">
             <button
               className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-text-main bg-white/10 rounded-lg"
               aria-current="page"
@@ -151,13 +158,19 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="bg-surface/90 backdrop-blur-md border border-white/10 p-1.5 rounded-xl shadow-2xl flex items-center gap-4 px-4">
+          {/* Alert count - simplified on mobile */}
+          <div className="bg-surface/90 backdrop-blur-md border border-white/10 p-1.5 md:p-1.5 rounded-xl shadow-2xl flex items-center gap-2 md:gap-4 px-3 md:px-4">
             <div className="flex flex-col items-end">
-              <span className="text-[10px] text-text-main/40 font-bold uppercase">
+              <span className="hidden md:block text-[10px] text-text-main/40 font-bold uppercase">
                 Active Alerts
               </span>
               <span className="text-sm font-bold">
-                {loading ? "—" : `${activeAlerts} Incidents`}
+                {loading ? "—" : (
+                  <>
+                    <span className="md:hidden">{activeAlerts}</span>
+                    <span className="hidden md:inline">{activeAlerts} Incidents</span>
+                  </>
+                )}
               </span>
             </div>
             <button
@@ -166,10 +179,10 @@ export default function HomePage() {
                 setToast("No notifications (demo).");
                 window.setTimeout(() => setToast(null), 2500);
               }}
-              className="size-10 rounded-lg bg-white/5 flex items-center justify-center text-text-main hover:bg-white/10 transition-colors"
+              className="size-8 md:size-10 rounded-lg bg-white/5 flex items-center justify-center text-text-main hover:bg-white/10 transition-colors"
               aria-label="Notifications"
             >
-              <span className="material-symbols-outlined text-xl">
+              <span className="material-symbols-outlined text-lg md:text-xl">
                 notifications
               </span>
             </button>
@@ -177,18 +190,45 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Left: Recent Incidents */}
-      <aside className="absolute left-8 top-1/2 -translate-y-1/2 z-20 w-80 max-h-[70vh] flex flex-col pointer-events-none">
-        <div className="bg-surface border border-white/10 rounded-2xl flex flex-col pointer-events-auto shadow-2xl overflow-hidden">
-          <div className="p-5 border-b border-white/5 flex items-center justify-between bg-white/5">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary">
+      {/* Recent Incidents - Desktop Sidebar / Mobile Bottom Sheet */}
+      <aside className={`
+        fixed md:absolute 
+        left-0 md:left-8 
+        bottom-0 md:top-1/2 md:-translate-y-1/2
+        w-full md:w-80 
+        z-20 
+        flex flex-col 
+        pointer-events-none
+        transition-all duration-300 ease-in-out
+        ${showMobilePanel ? 'h-[65vh]' : 'h-auto'}
+        md:h-auto md:max-h-[70vh]
+      `}>
+        <div className="bg-surface border border-white/10 rounded-t-2xl md:rounded-2xl flex flex-col pointer-events-auto shadow-2xl overflow-hidden h-full">
+          {/* Mobile drag handle */}
+          <button 
+            className="md:hidden w-full py-2 flex justify-center items-center touch-none"
+            onClick={() => setShowMobilePanel(!showMobilePanel)}
+          >
+            <span className="w-10 h-1 bg-white/30 rounded-full" />
+          </button>
+
+          {/* Header */}
+          <div className="p-3 md:p-5 border-b border-white/5 flex items-center justify-between bg-white/5">
+            <button 
+              className="flex items-center gap-2 md:cursor-default"
+              onClick={() => setShowMobilePanel(!showMobilePanel)}
+            >
+              <span className="material-symbols-outlined text-primary text-lg md:text-base">
                 history
               </span>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-text-main">
+              <h2 className="text-xs md:text-sm font-bold uppercase tracking-wider text-text-main">
                 Recent Incidents
               </h2>
-            </div>
+              {/* Mobile expand indicator */}
+              <span className="md:hidden text-text-main/50">
+                {showMobilePanel ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+              </span>
+            </button>
             <Link
               href="/incidents"
               className="text-[10px] font-bold text-primary hover:underline"
@@ -197,24 +237,31 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="overflow-y-auto custom-scrollbar p-4 flex flex-col gap-3 h-full">
+          {/* Content - hidden on mobile when collapsed */}
+          <div className={`
+            overflow-y-auto custom-scrollbar p-3 md:p-4 flex flex-col gap-2 md:gap-3 
+            ${showMobilePanel ? 'flex-1' : 'hidden md:flex md:flex-1'}
+          `}>
             {loading ? (
-              <div className="p-6 flex items-center justify-center text-muted text-sm">
+              <div className="p-4 md:p-6 flex items-center justify-center text-muted text-sm">
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Loading…
               </div>
             ) : recentIncidents.length === 0 ? (
-              <div className="p-6 text-muted text-sm">
+              <div className="p-4 md:p-6 text-muted text-sm">
                 No incidents in the last 24 hours.
               </div>
             ) : (
               recentIncidents.map((incident) => (
                 <div
                   key={incident.id}
-                  onClick={() => setSelectedIncident(incident)}
-                  className="p-3 rounded-xl bg-white/10 border border-white/10 hover:border-primary/30 transition-all cursor-pointer group"
+                  onClick={() => {
+                    setSelectedIncident(incident);
+                    setShowMobilePanel(false);
+                  }}
+                  className="p-2.5 md:p-3 rounded-xl bg-white/10 border border-white/10 hover:border-primary/30 transition-all cursor-pointer group"
                 >
-                  <div className="flex justify-between items-start mb-2">
+                  <div className="flex justify-between items-start mb-1.5 md:mb-2">
                     <span className={categoryPill(incident.category)}>
                       {incident.category}
                     </span>
@@ -233,7 +280,8 @@ export default function HomePage() {
             )}
           </div>
 
-          <div className="p-4 bg-white/5 border-t border-white/5">
+          {/* Toggle - desktop only */}
+          <div className="hidden md:block p-4 bg-white/5 border-t border-white/5">
             <label className="relative inline-flex items-center cursor-pointer select-none">
               <input
                 checked={showRecent}
@@ -250,24 +298,24 @@ export default function HomePage() {
         </div>
       </aside>
 
-      {/* Right: Map Controls */}
-      <div className="absolute right-10 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
-        <div className="pointer-events-auto flex flex-col bg-surface/90 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+      {/* Map Controls - Responsive positioning */}
+      <div className="absolute right-3 md:right-10 bottom-24 md:top-1/2 md:-translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
+        <div className="pointer-events-auto flex flex-col bg-surface/90 backdrop-blur-md border border-white/10 rounded-xl md:rounded-2xl overflow-hidden shadow-2xl">
           <button
             type="button"
             onClick={() => map?.zoomIn()}
-            className="p-4 hover:bg-white/5 border-b border-white/5 transition-all text-text-main/60 hover:text-text-main"
+            className="p-2.5 md:p-4 hover:bg-white/5 border-b border-white/5 transition-all text-text-main/60 hover:text-text-main"
             aria-label="Zoom in"
           >
-            <span className="material-symbols-outlined">add</span>
+            <span className="material-symbols-outlined text-lg md:text-base">add</span>
           </button>
           <button
             type="button"
             onClick={() => map?.zoomOut()}
-            className="p-4 hover:bg-white/5 transition-all text-text-main/60 hover:text-text-main"
+            className="p-2.5 md:p-4 hover:bg-white/5 transition-all text-text-main/60 hover:text-text-main"
             aria-label="Zoom out"
           >
-            <span className="material-symbols-outlined">remove</span>
+            <span className="material-symbols-outlined text-lg md:text-base">remove</span>
           </button>
         </div>
         <button
@@ -287,25 +335,26 @@ export default function HomePage() {
               () => setToast("Location permission denied.")
             );
           }}
-          className="pointer-events-auto size-14 bg-surface/90 backdrop-blur-md border border-white/10 rounded-2xl flex items-center justify-center shadow-2xl text-text-main/60 hover:text-primary transition-all"
+          className="pointer-events-auto size-10 md:size-14 bg-surface/90 backdrop-blur-md border border-white/10 rounded-xl md:rounded-2xl flex items-center justify-center shadow-2xl text-text-main/60 hover:text-primary transition-all"
           aria-label="Center map on your location"
         >
-          <span className="material-symbols-outlined">my_location</span>
+          <span className="material-symbols-outlined text-lg md:text-base">my_location</span>
         </button>
+        {/* Layers toggle - desktop only */}
         <button
           type="button"
           onClick={() =>
             setTilesStyle((s) => (s === "muted" ? "normal" : "muted"))
           }
-          className="pointer-events-auto size-14 bg-surface/90 backdrop-blur-md border border-white/10 rounded-2xl flex items-center justify-center shadow-2xl text-text-main/60 hover:text-primary transition-all"
+          className="hidden md:flex pointer-events-auto size-14 bg-surface/90 backdrop-blur-md border border-white/10 rounded-2xl items-center justify-center shadow-2xl text-text-main/60 hover:text-primary transition-all"
           aria-label="Toggle map styling"
         >
           <span className="material-symbols-outlined">layers</span>
         </button>
       </div>
 
-      {/* Bottom Stats */}
-      <footer className="absolute bottom-0 w-full z-20 p-8 flex items-center justify-between pointer-events-none">
+      {/* Bottom Stats - Desktop only */}
+      <footer className="hidden md:flex absolute bottom-0 w-full z-20 p-8 items-center justify-between pointer-events-none">
         <div className="flex items-center gap-8 bg-surface/80 backdrop-blur-md border border-white/10 px-6 py-4 rounded-2xl pointer-events-auto shadow-2xl">
           <div className="flex flex-col">
             <span className="text-[10px] text-text-main/40 font-bold uppercase">
@@ -346,40 +395,40 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* Report Emergency FAB */}
+      {/* Report Emergency FAB - Responsive */}
       <Link
         href="/report"
-        className="absolute bottom-10 right-10 z-30 flex items-center gap-3 px-6 py-4 bg-danger text-white rounded-full shadow-2xl hover:brightness-110 active:scale-95 transition-all group pointer-events-auto"
+        className="fixed md:absolute bottom-3 md:bottom-10 right-3 md:right-10 z-30 flex items-center gap-2 md:gap-3 px-4 md:px-6 py-3 md:py-4 bg-danger text-white rounded-full shadow-2xl hover:brightness-110 active:scale-95 transition-all group pointer-events-auto"
       >
-        <span className="material-symbols-outlined font-bold">emergency</span>
-        <span className="text-sm font-bold uppercase tracking-widest">
-          Report an Emergency
+        <span className="material-symbols-outlined font-bold text-lg md:text-base">emergency</span>
+        <span className="text-xs md:text-sm font-bold uppercase tracking-wider md:tracking-widest">
+          <span className="hidden sm:inline">Report an </span>Emergency
         </span>
       </Link>
 
-      {/* Right: Incident Details Drawer (matches screenshot structure) */}
+      {/* Incident Details Drawer - Full width on mobile */}
       {selectedIncident && (
-        <aside className="fixed top-0 right-0 z-40 h-full w-full max-w-[480px] bg-surface/98 backdrop-blur-xl border-l border-white/10 shadow-2xl overflow-y-auto custom-scrollbar">
-          <div className="relative h-48 w-full bg-[#111818]">
+        <aside className="fixed top-0 right-0 z-40 h-full w-full md:max-w-[480px] bg-surface/98 backdrop-blur-xl border-l border-white/10 shadow-2xl overflow-y-auto custom-scrollbar">
+          <div className="relative h-36 md:h-48 w-full bg-[#111818]">
             <div className="absolute inset-0 bg-gradient-to-t from-[#1c2727] via-transparent to-transparent" />
             <button
               onClick={() => setSelectedIncident(null)}
-              className="absolute top-4 right-4 bg-[#111818]/60 backdrop-blur-md p-2 rounded-full text-text-main hover:bg-primary hover:text-white transition-colors"
+              className="absolute top-3 md:top-4 right-3 md:right-4 bg-[#111818]/60 backdrop-blur-md p-2 rounded-full text-text-main hover:bg-primary hover:text-white transition-colors"
               aria-label="Close incident details"
             >
               <span className="material-symbols-outlined">close</span>
             </button>
-            <div className="absolute bottom-4 left-6">
+            <div className="absolute bottom-3 md:bottom-4 left-4 md:left-6">
               <span className="px-2 py-1 bg-danger/90 text-[10px] font-bold text-white rounded uppercase tracking-wider mb-2 inline-block">
                 High Priority
               </span>
-              <h2 className="text-2xl font-black text-text-main capitalize">
+              <h2 className="text-xl md:text-2xl font-black text-text-main capitalize">
                 {selectedIncident.category.replace(/_/g, " ")}
               </h2>
             </div>
           </div>
 
-          <div className="p-6 flex flex-col gap-6">
+          <div className="p-4 md:p-6 flex flex-col gap-4 md:gap-6">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-muted text-xs font-medium uppercase tracking-tighter">
@@ -405,7 +454,7 @@ export default function HomePage() {
                   location_on
                 </span>
               </div>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <p className="text-xs text-muted">Approximate Location</p>
                 <p className="text-sm font-semibold text-text-main line-clamp-2">
                   {selectedIncident.location_label}
@@ -415,19 +464,19 @@ export default function HomePage() {
                 href={`https://www.google.com/maps/search/?api=1&query=${selectedIncident.latitude},${selectedIncident.longitude}`}
                 target="_blank"
                 rel="noreferrer"
-                className="text-primary hover:bg-primary hover:text-white p-2 rounded-lg transition-all"
+                className="text-primary hover:bg-primary hover:text-white p-2 rounded-lg transition-all flex-shrink-0"
                 aria-label="Open directions"
               >
                 <span className="material-symbols-outlined">directions</span>
               </a>
             </div>
 
-            {/* AI Guidance teaser (full matching will be next step) */}
+            {/* AI Guidance teaser */}
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-primary text-xl">
                 smart_toy
               </span>
-              <h3 className="text-lg font-bold text-text-main">AI Guidance</h3>
+              <h3 className="text-base md:text-lg font-bold text-text-main">AI Guidance</h3>
               <span className="ml-auto text-[10px] bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full uppercase font-bold tracking-widest">
                 Live Analysis
               </span>
@@ -438,9 +487,8 @@ export default function HomePage() {
                 Generate calm, structured next steps tailored to this incident.
               </p>
               <button
-                className="mt-4 w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary/20"
+                className="mt-4 w-full h-11 md:h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary/20"
                 onClick={() => {
-                  // Next: wire to a drawer-mode AI panel matching screenshot
                   window.dispatchEvent(
                     new CustomEvent("gta-watch:open-guidance", {
                       detail: selectedIncident,
@@ -456,12 +504,12 @@ export default function HomePage() {
               <p className="text-[10px] font-bold text-muted uppercase tracking-widest">
                 Official Channels
               </p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2 md:gap-3">
                 <a
                   href="https://www.toronto.ca/community-people/public-safety-alerts/"
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-2 p-3 bg-[#283939] rounded-xl border border-white/5 hover:bg-[#344b4b] transition-all text-left"
+                  className="flex items-center gap-2 p-2.5 md:p-3 bg-[#283939] rounded-xl border border-white/5 hover:bg-[#344b4b] transition-all text-left"
                 >
                   <span className="material-symbols-outlined text-sm text-muted">
                     podcasts
@@ -474,7 +522,7 @@ export default function HomePage() {
                   href="https://x.com/TPSOperations"
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-2 p-3 bg-[#283939] rounded-xl border border-white/5 hover:bg-[#344b4b] transition-all text-left"
+                  className="flex items-center gap-2 p-2.5 md:p-3 bg-[#283939] rounded-xl border border-white/5 hover:bg-[#344b4b] transition-all text-left"
                 >
                   <span className="material-symbols-outlined text-sm text-muted">
                     public
@@ -487,13 +535,13 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="sticky bottom-0 p-6 bg-[#0d1117]/90 backdrop-blur-xl border-t border-white/10 flex flex-col gap-3">
+          <div className="sticky bottom-0 p-4 md:p-6 bg-[#0d1117]/90 backdrop-blur-xl border-t border-white/10 flex flex-col gap-2 md:gap-3">
             <a
               href="tel:911"
-              className="flex items-center justify-center gap-2 w-full h-14 bg-danger hover:bg-danger/90 active:scale-95 transition-all text-white rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.3)]"
+              className="flex items-center justify-center gap-2 w-full h-12 md:h-14 bg-danger hover:bg-danger/90 active:scale-95 transition-all text-white rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.3)]"
             >
               <span className="material-symbols-outlined font-bold">call</span>
-              <span className="text-lg font-black tracking-wide uppercase">
+              <span className="text-base md:text-lg font-black tracking-wide uppercase">
                 Call 911 Now
               </span>
             </a>
@@ -518,7 +566,7 @@ export default function HomePage() {
                   setToast("Unable to share on this device.");
                 }
               }}
-              className="flex items-center justify-center gap-2 w-full h-12 bg-[#283939] hover:bg-[#344b4b] transition-all text-text-main rounded-xl font-bold text-sm"
+              className="flex items-center justify-center gap-2 w-full h-10 md:h-12 bg-[#283939] hover:bg-[#344b4b] transition-all text-text-main rounded-xl font-bold text-sm"
             >
               <span className="material-symbols-outlined text-sm">share</span>
               Share Incident Report
@@ -529,7 +577,7 @@ export default function HomePage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+        <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
           <div className="bg-surface/90 backdrop-blur-md border border-white/10 text-text-main px-4 py-3 rounded-xl shadow-2xl text-sm">
             {toast}
           </div>
