@@ -31,7 +31,7 @@ This project is intended for **mid-to-senior frontend engineering interviews** a
 | **Database**    | Supabase (PostgreSQL + RLS)   |
 | **AI**          | OpenRouter (Llama 3.1)        |
 | **Geocoding**   | Geoapify                      |
-| **Deployment**  | Vercel-ready (not included)   |
+| **Deployment**  | Netlify                       |
 
 ### Data Flow
 
